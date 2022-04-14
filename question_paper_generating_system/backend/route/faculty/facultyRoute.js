@@ -7,6 +7,7 @@ const {
     fetchFacultyDetailsCtrl,
     facultyProfileCtrl,
     updateFacultyCtrl,
+    updateFacultyPasswordCtrl,
 } = require("../../controllers/faculty/facultiesCtrl");
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
 
@@ -16,7 +17,8 @@ facultyRoutes.post("/register", facultyRegisterCtrl);
 facultyRoutes.post("/login", loginFacultyCtrl);
 facultyRoutes.get("/",authMiddleware,fetchFacultiesCtrl);
 facultyRoutes.get("/profile/:id",authMiddleware,facultyProfileCtrl);
-facultyRoutes.put("/:id",authMiddleware,updateFacultyCtrl);
+facultyRoutes.put("/updateFaculty",authMiddleware,updateFacultyCtrl);
+facultyRoutes.put("/password",authMiddleware,updateFacultyPasswordCtrl);
 facultyRoutes.delete("/:id",deleteFacultiesCtrl);
 facultyRoutes.get("/:id",fetchFacultyDetailsCtrl);
 

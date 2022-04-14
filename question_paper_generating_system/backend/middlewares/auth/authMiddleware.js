@@ -1,12 +1,12 @@
 const expressAsyncHandler = require("express-async-handler");
 
 const jwt = require("jsonwebtoken");
-const Faculty = require("../../model/faculty/faculty");
+const Faculty = require("../../model/faculty/Faculty");
 
 const authMiddleware = expressAsyncHandler(async (req,res,next)=> {
     let token;
 
-    if(req?.headers?.authorization?.startsWith('Bearer')){
+    if(req?.headers?.authorization?.startsWith("Bearer")){
         try {
             token = req.headers.authorization.split(' ')[1];
             if(token){
@@ -19,12 +19,12 @@ const authMiddleware = expressAsyncHandler(async (req,res,next)=> {
                 req.faculty = faculty;
                 next();
             }
-            else{
-                throw new "There is no token attached to header"();
-            }
         } catch (error) {
             throw new Error("Not authorized token expired, login again");
         }
+    }
+    else{
+        throw new Error("There is no token attached to header");
     }
 });
 

@@ -1,5 +1,5 @@
 const expressAsyncHandler = require("express-async-handler");
-const Faculty = require("../../model/faculty/faculty");
+const Faculty = require("../../model/faculty/Faculty");
 const generateToken = require("../../config/token/generateToken");
 const validateMongodbID = require("../../utils/validateMongodbID");
 
@@ -131,7 +131,7 @@ const facultyProfileCtrl = expressAsyncHandler( async (req, res) => {
 //----------------------------------------------------------------
 
 const updateFacultyCtrl = expressAsyncHandler( async (req, res) => {
-    const { _id } = req?.faculty;
+    const _id = req?.faculty.id;
     validateMongodbID(_id);
     
     const faculty = await Faculty.findByIdAndUpdate(
@@ -150,6 +150,30 @@ const updateFacultyCtrl = expressAsyncHandler( async (req, res) => {
 
 });
 
+//-----------------------------------------------------------
+// update password
+//----------------------------------------------------------------
+
+const updateFacultyPasswordCtrl = expressAsyncHandler( async (req, res) => {
+    //destucture the login faculty
+    const _id = req?.faculty.id;
+    const password = req?.body?.password;
+    //const {password} = req.body;
+    //console.log(password);
+    validateMongodbID(_id);
+
+    //Find the faculty by id
+    const faculty = await Faculty.findById(_id);
+    //console.log(faculty);
+    if(password){
+        faculty.password = password;
+        const updatedFaculty = await faculty.save();
+        res.json(updatedFaculty);
+    }
+    else{
+        res.json(faculty);
+    }
+});
 
 
 module.exports = {
@@ -160,4 +184,5 @@ module.exports = {
     fetchFacultyDetailsCtrl,
     facultyProfileCtrl,
     updateFacultyCtrl,
+    updateFacultyPasswordCtrl,
     };
