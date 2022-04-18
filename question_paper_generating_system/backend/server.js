@@ -32,7 +32,7 @@ app.listen(PORT, console.log(`Server is running on port ${PORT}`));
 
 //userRoutes
 app.use("/api/user", userRoutes);
-app.use("/api/questions", questionRoutes);
+app.use("/api/question", questionRoutes);
 
 //errorHandler
 //catch error beloe route

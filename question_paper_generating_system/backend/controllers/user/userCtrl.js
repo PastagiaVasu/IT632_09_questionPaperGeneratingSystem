@@ -12,7 +12,10 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
     // check if user exist
     const userExist = await User.findOne({ email: req?.body?.email });
 
-    if (userExist) throw new Error('user already exists');
+    if (userExist) {
+        res.status(401);
+        throw new Error('user already exists');
+    }
     //console.log(req.body);
     try {
         //Register user
@@ -23,16 +26,14 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
             email: req?.body?.email,
             password: req?.body?.password,
             contact_number: req?.body?.contact_number,
-            role: req?.body?.role,     // true for admin | false for faculty
+            role: req?.body?.role,      // true for admin | false for faculty
             status: req?.body?.status,  // true for admin | false for faculty
         });
         res.json(user);
     } catch (error) {
         res.json(error);
     }
-
-}
-);
+});
 
 /**/
 //----------------------------------------------------------------
@@ -40,12 +41,12 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
 //----------------------------------------------------------------
 const loginCtrl = expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    //check if faculty exists
-    const userFound = await User.findOne({ email });
+    //check if user exists
+    const userFound = await User.findOne({ email: email });
 
     //check if paassword s matched
     if (userFound && userFound.status && await userFound.isPasswordMatched(password)) {
-        res.json({
+        res.status(200).json({
             _id: userFound?._id,
             firstName: userFound?.firstName,
             lastName: userFound?.lastName,
@@ -68,13 +69,24 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
 //-----------------------------------------------------------
 
 const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
-    console.log(req.headers);
-    try {
-        role = false; // fetch all faculties
-        const user = await User.find({ role });
-        res.json(user);
-    } catch (error) {
-        res.json(error);
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && userFound.role) {
+
+        try {
+            const user = await User.find({ role: false });  // fetch all faculties
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
     }
 });
 
@@ -83,18 +95,36 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
 //-----------------------------------------------------------
 
 const userStatusCtrl = expressAsyncHandler(async (req, res) => {
-    // console.log(req.params);
-    const id = req.params;
 
-    const userExist = await User.findOne({ _id: id });
+    const id = req?.user.id;
+    validateMongodbID(id);
 
-    try {
-        const updateStatus = await Faculty.findByIdAndDelete(id);
-        res.json(deletedFaculty);
-    } catch (error) {
-        res.json(error);
+    const userFound = await User.findOne({ _id: id });
+    const userExist = await User.findOne({ _id: req?.body?.userId });
+
+    if (userFound && userFound.status && userFound.role) {
+
+        try {
+            const user = await User.findByIdAndUpdate(
+                userExist._id, {
+                status: !userExist.status,
+            },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
+
+            // res.json(user);
+            res.status(200).send("Status changed");
+        } catch (error) {
+            res.json(error);
+        }
     }
-    res.send("Delete faculty controller");
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
 });
 
 
@@ -181,6 +211,7 @@ module.exports = {
     userRegisterCtrl,
     loginCtrl,
     fetchUserCtrl,
+    userStatusCtrl,
     // userProfileCtrl,
     // deleteFacultiesCtrl,
     // fetchFacultyDetailsCtrl,

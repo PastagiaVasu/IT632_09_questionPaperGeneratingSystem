@@ -5,17 +5,13 @@ const paperDetailSchema = new mongoose.Schema({
 
     paper_id: {
         required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'paper'
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'paper',
     },
     answer_id: {
         required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'answer'
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'answer',
     },
 },
     {

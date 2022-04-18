@@ -5,17 +5,15 @@ const answerSchema = new mongoose.Schema({
 
     question_id: {
         required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'question'
-        },
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'question',
     },
     answer: {
         required: [true, "Answer is required"],
         type: String,
     },
-    righteousness: {
-        required: [true, "Righteousness is required"],
+    right: {
+        required: [true, "Right is required"],
         type: Boolean,
     },
     status: {

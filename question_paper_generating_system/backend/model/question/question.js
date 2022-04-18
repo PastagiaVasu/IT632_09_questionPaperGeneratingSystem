@@ -5,21 +5,19 @@ const questionSchema = new mongoose.Schema({
 
     user_subject_id: {
         required: true,
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user_subject' 
-        }],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user_subject',
     },
     question: {
         required: [true, "Question is required"],
         type: String,
     },
-    type__: {
+    type: {
         required: [true, "Type is required"],
         type: Boolean,
     },
-    weightage: {
-        required: [true, "Weightage is required"],
+    mark: {
+        required: [true, "Mark is required"],
         type: Number,
     },
     diffculty: {

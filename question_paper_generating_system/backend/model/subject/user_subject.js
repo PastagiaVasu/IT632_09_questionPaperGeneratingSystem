@@ -4,18 +4,18 @@ const mongoose = require('mongoose');
 const userSubjectSchema = new mongoose.Schema({
 
     user_id: {
-        required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'user'
-        },
+        required: [true, "user_id is required"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
     },
     subject_id: {
-        required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'subject'
-        },
+        required: [true, "subject_id is required"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'subject',
+    },
+    status: {
+        type: Boolean,
+        default: true,
     },
 },
     {

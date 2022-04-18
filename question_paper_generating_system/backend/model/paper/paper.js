@@ -5,21 +5,21 @@ const paperSchema = new mongoose.Schema({
 
     user_id: {
         required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'user'
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
     },
     subject_id: {
         required: true,
-        type: {
-            type: Schema.Types.ObjectId,
-            ref: 'subject'
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'subject',
     },
     exam_date: {
         required: [true, "Exam date is required"],
         type: Date,
+    },
+    marks: {
+        required: [true, "Weightage is required"],
+        type: Number,
     },
     status: {
         type: Boolean,
