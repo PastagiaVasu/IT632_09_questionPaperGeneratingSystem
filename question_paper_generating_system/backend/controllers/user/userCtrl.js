@@ -121,7 +121,7 @@ const verifyRegistration = expressAsyncHandler(async (req, res) => {
         try {
             const user = await User.findByIdAndUpdate(
                 userExist._id, {
-                status: true,
+                isEmailVerified: true,
             },
                 {
                     new: true,
@@ -156,17 +156,25 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
 
     //check if paassword s matched
     if (userFound && userFound.status && await userFound.isPasswordMatched(password)) {
-        let tokenLocal = generateToken(userFound?._id);
-        sessionStorage.setItem("token",tokenLocal);
-        res.status(200).json({
-            _id: userFound?._id,
-            firstName: userFound?.firstName,
-            lastName: userFound?.lastName,
-            email: userFound?.email,
-            profilePhoto: userFound?.profilePhoto,
-            role: userFound?.role,
-            token: tokenLocal,
-        });
+
+        if(userFound?.isEmailVerified){
+            let tokenLocal = generateToken(userFound?._id);
+            //sessionStorage.setItem("token",tokenLocal);
+
+            res.status(200).json({
+                _id: userFound?._id,
+                firstName: userFound?.firstName,
+                lastName: userFound?.lastName,
+                email: userFound?.email,
+                profilePhoto: userFound?.profilePhoto,
+                role: userFound?.role,
+                token: tokenLocal,
+            });
+        }
+        else{
+            res.status(401);
+            throw new Error('Please verify your email first.');     
+        }  
     }
     else {
         res.status(401);
