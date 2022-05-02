@@ -17,6 +17,7 @@
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.8",
+    "nodemailer": "^6.7.4",
     "nodemon": "^2.0.15"
   }
 }
