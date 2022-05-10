@@ -16,5 +16,4 @@ questionRoutes.post("/newObjectiveQuestion", authMiddleware, newObjectiveQuestio
 questionRoutes.post("/editObjectiveQuestion", authMiddleware, editObjectiveQuestion);
 questionRoutes.post("/viewQuestionAnswer", authMiddleware, viewQuestionAnswer);
 
-
 module.exports = questionRoutes;
