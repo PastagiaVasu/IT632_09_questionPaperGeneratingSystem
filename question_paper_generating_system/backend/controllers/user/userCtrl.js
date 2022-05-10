@@ -1,5 +1,6 @@
 const expressAsyncHandler = require("express-async-handler");
 const User = require("../../model/user/user");
+const Question = require("../../model/question/question");
 const generateToken = require("../../config/token/generateToken");
 const validateMongodbID = require("../../utils/validateMongodbID");
 
@@ -127,6 +128,31 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
+//-----------------------------------------------------------
+// fetch all userQuestions
+//-----------------------------------------------------------
+
+const userQuestionCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && !userFound.role) {
+
+        try {
+            const userQues = await Question.find({ user_id: id });  // fetch all userSubject
+            res.status(200).json(userQues);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
 
 /*
 //-----------------------------------------------------------
@@ -212,6 +238,7 @@ module.exports = {
     loginCtrl,
     fetchUserCtrl,
     userStatusCtrl,
+    userQuestionCtrl,
     // userProfileCtrl,
     // deleteFacultiesCtrl,
     // fetchFacultyDetailsCtrl,

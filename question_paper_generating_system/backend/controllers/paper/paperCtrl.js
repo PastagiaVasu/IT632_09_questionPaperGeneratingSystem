@@ -173,6 +173,33 @@ const generatePaperCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
+
+// ----------------------------------------------------------------
+//  view question paper
+// ----------------------------------------------------------------
+
+const viewPaperCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && userFound.role) {
+        try {
+            //view paper
+            const paperDetails = await PaperDetail.find({ paper_id: req?.body?.paper_id });
+            res.status(200).json(paperDetails);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
 //-----------------------------------------------------------
 // fetch question
 //-----------------------------------------------------------
@@ -226,5 +253,6 @@ const fetchAnswerCtrl = expressAsyncHandler(async (req, res) => {
 module.exports = {
     generatePaperCtrl,
     fetchQuestionCtrl,
-    fetchAnswerCtrl
+    fetchAnswerCtrl,
+    viewPaperCtrl
 };

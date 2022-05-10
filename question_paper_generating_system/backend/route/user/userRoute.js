@@ -4,6 +4,7 @@ const {
     loginCtrl,
     fetchUserCtrl,
     userStatusCtrl,
+    userQuestionCtrl,
     // deleteUserCtrl,
     // fetchUserDetailsCtrl,
     // userProfileCtrl,
@@ -30,6 +31,7 @@ const userRoutes = express.Router();
 userRoutes.post("/register", userRegisterCtrl);
 userRoutes.post("/login", loginCtrl);
 userRoutes.get("/allFaculties", authMiddleware, fetchUserCtrl);
+userRoutes.get("/allQuestions", authMiddleware, userQuestionCtrl);
 userRoutes.post("/changeStatus", authMiddleware, userStatusCtrl);
 // userRoutes.get("/profile/:id", authMiddleware, userProfileCtrl);
 // userRoutes.put("/:id", authMiddleware, updateUserCtrl);
