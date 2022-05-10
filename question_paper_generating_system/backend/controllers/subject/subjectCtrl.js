@@ -48,7 +48,7 @@ const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
 const userAddSubjectCtrl = expressAsyncHandler(async (req, res) => {
 
     const id = req?.user.id;
-    const sid = req?.body?.subjectId;
+    const sid = req?.body?.subject_id;
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });

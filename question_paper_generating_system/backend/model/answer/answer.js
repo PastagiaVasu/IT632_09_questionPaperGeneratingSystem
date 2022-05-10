@@ -5,8 +5,8 @@ const answerSchema = new mongoose.Schema({
 
     question_id: {
         required: true,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'question',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'question',
     },
     answer: {
         required: [true, "Answer is required"],

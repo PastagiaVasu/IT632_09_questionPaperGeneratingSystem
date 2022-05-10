@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const dbConnect = require("./config/db/dbConnect");
 const userRoutes = require("././route/user/userRoute");
+const paperRoutes = require("././route/paper/paperRoute");
 const questionRoutes = require("././route/question/questionRoute");
 const { errorHandler, notFound } = require("./middlewares/error/errorHandler");
 
@@ -33,6 +34,7 @@ app.listen(PORT, console.log(`Server is running on port ${PORT}`));
 //userRoutes
 app.use("/api/user", userRoutes);
 app.use("/api/question", questionRoutes);
+app.use("/api/paper", paperRoutes);
 
 //errorHandler
 //catch error beloe route

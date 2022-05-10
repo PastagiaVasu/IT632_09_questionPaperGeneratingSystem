@@ -100,7 +100,7 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });
-    const userExist = await User.findOne({ _id: req?.body?.userId });
+    const userExist = await User.findOne({ _id: req?.body?.user_id });
 
     if (userFound && userFound.status && userFound.role) {
 

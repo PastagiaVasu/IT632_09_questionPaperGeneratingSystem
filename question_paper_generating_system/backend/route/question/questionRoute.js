@@ -4,6 +4,7 @@ const {
     editSubjectiveQuestion,
     newObjectiveQuestion,
     editObjectiveQuestion,
+    viewQuestionAnswer,
 } = require("../../controllers/question/questionsCtrl");
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
 
@@ -13,6 +14,7 @@ questionRoutes.post("/newSubjectiveQuestion", authMiddleware, newSubjectiveQuest
 questionRoutes.post("/editSubjectiveQuestion", authMiddleware, editSubjectiveQuestion);
 questionRoutes.post("/newObjectiveQuestion", authMiddleware, newObjectiveQuestion);
 questionRoutes.post("/editObjectiveQuestion", authMiddleware, editObjectiveQuestion);
+questionRoutes.post("/viewQuestionAnswer", authMiddleware, viewQuestionAnswer);
 
 
 module.exports = questionRoutes;
