@@ -3,7 +3,8 @@ const {
     generatePaperCtrl,
     fetchQuestionCtrl,
     fetchAnswerCtrl,
-    viewPaperCtrl
+    viewPaperCtrl,
+    fetchAnswerFromQuestionCtrl
 } = require("../../controllers/paper/paperCtrl");
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
 
@@ -13,5 +14,6 @@ paperRoutes.post("/generatePaper", authMiddleware, generatePaperCtrl);
 paperRoutes.post("/fetchQuestion", authMiddleware, fetchQuestionCtrl);
 paperRoutes.post("/fetchAnswer", authMiddleware, fetchAnswerCtrl);
 paperRoutes.post("/viewPaper", authMiddleware, viewPaperCtrl);
+paperRoutes.post("/fetchAnswerFromQuestion", authMiddleware, fetchAnswerFromQuestionCtrl);
 
 module.exports = paperRoutes;

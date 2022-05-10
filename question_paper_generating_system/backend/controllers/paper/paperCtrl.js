@@ -250,9 +250,35 @@ const fetchAnswerCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
+//-----------------------------------------------------------
+// fetch answer from question
+//-----------------------------------------------------------
+
+const fetchAnswerFromQuestionCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && !userFound.role) {
+        try {
+            const answer = await Answer.find({ question_id: req?.body?.question_id });  // fetch all feedbacks
+            res.status(200).json(answer);
+        } catch (error) {
+            res.status(error.status).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
 module.exports = {
     generatePaperCtrl,
     fetchQuestionCtrl,
     fetchAnswerCtrl,
-    viewPaperCtrl
+    viewPaperCtrl,
+    fetchAnswerFromQuestionCtrl
 };
