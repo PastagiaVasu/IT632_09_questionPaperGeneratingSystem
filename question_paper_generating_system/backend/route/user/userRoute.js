@@ -46,7 +46,7 @@ userRoutes.post("/addSubject", authMiddleware, userAddSubjectCtrl);
 userRoutes.post("/newSubject", authMiddleware, newSubjectCtrl);
 userRoutes.post("/changeUserSubjectStatus", authMiddleware, userSubjectStatusCtrl);
 userRoutes.get("/allSubject", authMiddleware, fetchSubjectCtrl);
-userRoutes.post("/userSubject", authMiddleware, userSubjectCtrl);
+userRoutes.get("/userSubject", authMiddleware, userSubjectCtrl);
 
 
 module.exports = userRoutes;
