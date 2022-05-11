@@ -31,7 +31,8 @@ const userRoutes = express.Router();
 userRoutes.post("/register", userRegisterCtrl);
 userRoutes.post("/login", loginCtrl);
 userRoutes.get("/allFaculties", authMiddleware, fetchUserCtrl);
-userRoutes.post("/changeStatus", authMiddleware, userStatusCtrl);
+// userRoutes.post("/changeStatus", authMiddleware, userStatusCtrl);
+userRoutes.post("/changeStatus/:id", authMiddleware, userStatusCtrl);
 
 
 userRoutes.get("/verifyRegistration/:id",verifyRegistration);

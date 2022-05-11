@@ -6,40 +6,6 @@ const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 
 
-// // ----------------------------------------------------------------
-// //  Register
-// // ----------------------------------------------------------------
-
-// const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
-//     // check if user exist
-//     const userExist = await User.findOne({ email: req?.body?.email });
-
-//     if (userExist) {
-//         res.status(401);
-//         throw new Error('user already exists');
-//     }
-//     //console.log(req.body);
-//     try {
-//         //Register user
-//         const user = await User.create({
-//             //firstName: req.body && req.body.firstName,
-//             firstName: req?.body?.firstName,
-//             lastName: req?.body?.lastName,
-//             email: req?.body?.email,
-//             password: req?.body?.password,
-//             contact_number: req?.body?.contact_number,
-//             role: req?.body?.role,      // true for admin | false for faculty
-//             status: req?.body?.status,  // true for admin | false for faculty
-//         });
-//         res.json(user);
-//     } catch (error) {
-//         res.json(error);
-//     }
-// });
-
-
-
-
 // ----------------------------------------------------------------
 //  Register
 // ----------------------------------------------------------------
@@ -153,13 +119,12 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
     //check if user exists
     const userFound = await User.findOne({ email: email });
-
+    console.log(userFound);
     //check if paassword s matched
     if (userFound && userFound.status && await userFound.isPasswordMatched(password)) {
 
+        console.log("Inside if.....");
         if(userFound?.isEmailVerified){
-            let tokenLocal = generateToken(userFound?._id);
-            //sessionStorage.setItem("token",tokenLocal);
 
             res.status(200).json({
                 _id: userFound?._id,
@@ -168,7 +133,7 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
                 email: userFound?.email,
                 profilePhoto: userFound?.profilePhoto,
                 role: userFound?.role,
-                token: tokenLocal,
+                token: generateToken(userFound?._id),
             });
         }
         else{
@@ -182,6 +147,7 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     }
 
 });
+
 
 /**/
 //-----------------------------------------------------------
@@ -216,15 +182,20 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
 
 const userStatusCtrl = expressAsyncHandler(async (req, res) => {
 
-    const id = req?.user.id;
-    validateMongodbID(id);
+    //verify id admin is logged in
+    const idAdmin = req?.user.id;
+    validateMongodbID(idAdmin);
+    const userFound = await User.findOne({ _id: idAdmin });  //userFound is admin
 
-    const userFound = await User.findOne({ _id: id });
-    const userExist = await User.findOne({ _id: req?.body?.userId });
+    //now find the id which is being blocked or unblocked 
+    const userExist = await User.findOne({ _id: req?.params?.id });  //user exist is faculty
 
-    if (userFound && userFound.status && userFound.role) {
+    if (userFound && userFound.status && userFound.role) {     //check if admin is active or not
 
         try {
+
+
+            //change status of the id found by clicking button
             const user = await User.findByIdAndUpdate(
                 userExist._id, {
                 status: !userExist.status,
@@ -235,15 +206,46 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
                 }
             );
 
-            // res.json(user);
-            res.status(200).send("Status changed");
+
+            //now send mail to that user 
+            let transporter = await nodemailer.createTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: process.env.EMAIL,
+                    pass: process.env.EMAIL_PASS
+                },
+            });
+
+
+            const mailOptions = {
+                from: process.env.EMAIL, // sender address
+                to: userExist.email, // list of receivers
+                subject: "Attention, Your account status has changed!", // subjectSubject line
+                html: "Hello user, Your account ststus has been changed: "+`${userExist.status}`, //actual message
+            };
+
+
+            transporter.sendMail(mailOptions, function (err, info) {
+                if (err)
+                    console.log(err);
+                else{
+                    //console.log(info);
+                    res.json(user);
+                    res.status(200).send({ message: "status changed successfully" });
+                }
+            });
+
+            //res.status(200).send("Status changed but mail sending was erroros");
         } catch (error) {
             res.json(error);
         }
     }
     else {
         res.status(401);
-        throw new Error("Your account blocked");
+        throw new Error("Admin, Your account is blocked...");
     }
 });
 

@@ -4,7 +4,8 @@ const dbConnect = require("./config/db/dbConnect");
 const userRoutes = require("././route/user/userRoute");
 const questionRoutes = require("././route/question/questionRoute");
 const { errorHandler, notFound } = require("./middlewares/error/errorHandler");
-
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
 
 dotenv.config();
 const app = express();
@@ -16,7 +17,15 @@ dbConnect();
 
 //Middleware
 app.use(express.json());
-
+app.use(cookieParser());
+app.use(session(
+        {
+            secret: process.env.SESSION_SECRET,
+            resave: false,
+            saveUninitialized: true,
+            cookie: { secure: true }
+        }
+    ));
 //server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, console.log(`Server is running on port ${PORT}`));
