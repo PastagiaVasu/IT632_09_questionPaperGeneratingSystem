@@ -1,5 +1,6 @@
 const expressAsyncHandler = require("express-async-handler");
 const User = require("../../model/user/user");
+const Question = require("../../model/question/question");
 const generateToken = require("../../config/token/generateToken");
 const validateMongodbID = require("../../utils/validateMongodbID");
 const nodemailer = require("nodemailer");
@@ -157,7 +158,7 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
     if (userFound && userFound.status && userFound.role) {
 
         try {
-            const user = await User.find({ role: false, status: false });  // fetch all faculties
+            const user = await User.find({ role: false });  // fetch all faculties
             res.status(200).json(user);
         } catch (error) {
             res.status(401).json(error);
@@ -181,7 +182,7 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
     const userFound = await User.findOne({ _id: idAdmin });  //userFound is admin
 
     //now find the id which is being blocked or unblocked 
-    const userExist = await User.findOne({ _id: req?.params?.id });  //user exist is faculty
+    const userExist = await User.findOne({ _id: req?.body?.user_id });  //user exist is faculty
 
     if (userFound && userFound.status && userFound.role) {     //check if admin is active or not
 
@@ -217,7 +218,7 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
                 from: process.env.EMAIL, // sender address
                 to: userExist.email, // list of receivers
                 subject: "Attention, Your account status has changed!", // subjectSubject line
-                html: "Hello user, Your account ststus has been changed: " + `${userExist.status}`, //actual message
+                html: "Hello " + `${userExist.firstName}` + ", Your account is " + ((!userExist.status) ? "Actived" : "Deactivated"), //actual message
             };
 
 

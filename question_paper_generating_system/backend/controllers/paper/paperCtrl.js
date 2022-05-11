@@ -386,7 +386,7 @@ const viewPaperCtrl = expressAsyncHandler(async (req, res) => {
 
     const userFound = await User.findOne({ _id: id });
 
-    if (userFound && userFound.status && userFound.role) {
+    if (userFound && userFound.status) {
         try {
             //view paper
             const paperDetails = await PaperDetail.find({ paper_id: req?.body?.paper_id });
@@ -412,7 +412,7 @@ const fetchQuestionCtrl = expressAsyncHandler(async (req, res) => {
 
     const userFound = await User.findOne({ _id: id });
 
-    if (userFound && userFound.status && userFound.role) {
+    if (userFound && userFound.status) {
         try {
             const question = await Question.find({ _id: req?.body?.question_id });  // fetch all feedbacks
             res.status(200).json(question);
@@ -437,7 +437,7 @@ const fetchAnswerCtrl = expressAsyncHandler(async (req, res) => {
 
     const userFound = await User.findOne({ _id: id });
 
-    if (userFound && userFound.status && userFound.role) {
+    if (userFound && userFound.status) {
         try {
             const answer = await Answer.find({ _id: req?.body?.answer_id });  // fetch all feedbacks
             res.status(200).json(answer);
@@ -462,7 +462,7 @@ const fetchAnswerFromQuestionCtrl = expressAsyncHandler(async (req, res) => {
 
     const userFound = await User.findOne({ _id: id });
 
-    if (userFound && userFound.status && !userFound.role) {
+    if (userFound && userFound.status) {
         try {
             const answer = await Answer.find({ question_id: req?.body?.question_id });  // fetch all feedbacks
             res.status(200).json(answer);

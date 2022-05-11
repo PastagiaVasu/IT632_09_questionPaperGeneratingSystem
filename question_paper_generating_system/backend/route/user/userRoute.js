@@ -20,6 +20,7 @@ const {
     userSubjectStatusCtrl,
     fetchSubjectCtrl,
     userSubjectCtrl,
+    fetchSubjectByIdCtrl,
 } = require("../../controllers/subject/subjectCtrl");
 
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
@@ -30,7 +31,7 @@ userRoutes.post("/register", userRegisterCtrl);
 userRoutes.post("/login", loginCtrl);
 userRoutes.get("/allFaculties", authMiddleware, fetchUserCtrl);
 userRoutes.get("/allQuestions", authMiddleware, userQuestionCtrl);
-userRoutes.post("/changeStatus/:id", authMiddleware, userStatusCtrl);
+userRoutes.post("/changeStatus", authMiddleware, userStatusCtrl);
 userRoutes.get("/allVerifiedFaculties", authMiddleware, fetchVerifiedUserCtrl);
 
 // userRoutes.get("/profile/:id", authMiddleware, userProfileCtrl);
@@ -48,6 +49,7 @@ userRoutes.post("/newSubject", authMiddleware, newSubjectCtrl);
 userRoutes.post("/changeUserSubjectStatus", authMiddleware, userSubjectStatusCtrl);
 userRoutes.get("/allSubject", authMiddleware, fetchSubjectCtrl);
 userRoutes.get("/userSubject", authMiddleware, userSubjectCtrl);
+userRoutes.get("/fetchSubject", authMiddleware, fetchSubjectByIdCtrl);
 
 
 module.exports = userRoutes;
