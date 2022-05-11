@@ -481,5 +481,6 @@ module.exports = {
     fetchQuestionCtrl,
     fetchAnswerCtrl,
     viewPaperCtrl,
-    fetchAnswerFromQuestionCtrl
+    fetchAnswerFromQuestionCtrl,
+    generateCustomisePaperCtrl
 };

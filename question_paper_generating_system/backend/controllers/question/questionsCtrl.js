@@ -78,9 +78,6 @@ const editSubjectiveQuestion = expressAsyncHandler(async (req, res) => {
             // Edit question
             const que = await Question.findByIdAndUpdate(
                 question._id, {
-
-                subject_id: req?.body?.subject_id,
-                user_id: id,
                 question: req?.body?.question,
                 type: true,                        // true for subjective | false for objective
                 mark: req?.body?.mark,
@@ -135,13 +132,14 @@ const newObjectiveQuestion = expressAsyncHandler(async (req, res) => {
             // Insert new question
             const question = await Question.create({
 
-                user_subject_id: userSub._id,
+                subject_id: userSub?.subject_id,
+                user_id: userSub?.user_id,
                 question: req?.body?.question,
                 type: false,                        // true for subjective | false for objective
                 mark: req?.body?.mark,
                 difficulty: req?.body?.difficulty,
             })
-            
+
             const answers = req?.body?.answers;
             answers.forEach((ans) => {
                 const answer = Answer.create({
@@ -184,7 +182,6 @@ const editObjectiveQuestion = expressAsyncHandler(async (req, res) => {
             // Edit question
             const que = await Question.findByIdAndUpdate(
                 question._id, {
-
                 subject_id: req?.body?.subject_id,
                 user_id: id,
                 question: req?.body?.question,
