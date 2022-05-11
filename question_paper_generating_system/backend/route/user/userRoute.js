@@ -5,10 +5,8 @@ const {
     fetchUserCtrl,
     userStatusCtrl,
     userQuestionCtrl,
-    // deleteUserCtrl,
-    // fetchUserDetailsCtrl,
-    // userProfileCtrl,
-    // updateUserCtrl,
+    verifyRegistration,
+    fetchVerifiedUserCtrl,
 } = require("../../controllers/user/userCtrl");
 
 const {
@@ -32,12 +30,15 @@ userRoutes.post("/register", userRegisterCtrl);
 userRoutes.post("/login", loginCtrl);
 userRoutes.get("/allFaculties", authMiddleware, fetchUserCtrl);
 userRoutes.get("/allQuestions", authMiddleware, userQuestionCtrl);
-userRoutes.post("/changeStatus", authMiddleware, userStatusCtrl);
+userRoutes.post("/changeStatus/:id", authMiddleware, userStatusCtrl);
+userRoutes.get("/allVerifiedFaculties", authMiddleware, fetchVerifiedUserCtrl);
+
 // userRoutes.get("/profile/:id", authMiddleware, userProfileCtrl);
 // userRoutes.put("/:id", authMiddleware, updateUserCtrl);
 // userRoutes.delete("/:id", deleteUserCtrl);
 // userRoutes.get("/:id", fetchUserDetailsCtrl);
 
+userRoutes.get("/verifyRegistration/:id", verifyRegistration);
 userRoutes.post("/newFeedback", authMiddleware, newFeedbackCtrl);
 userRoutes.get("/allFeedback", authMiddleware, fetchFeedbackCtrl);
 

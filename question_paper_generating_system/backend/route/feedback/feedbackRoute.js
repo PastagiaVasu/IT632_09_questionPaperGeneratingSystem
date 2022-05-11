@@ -10,5 +10,5 @@ const userRoutes = express.Router();
 userRoutes.post("/newFeedback", newFeedbackCtrl);
 userRoutes.get("/allFeedback", authMiddleware, fetchFeedbackCtrl);
 
-A
+
 module.exports = userRoutes;

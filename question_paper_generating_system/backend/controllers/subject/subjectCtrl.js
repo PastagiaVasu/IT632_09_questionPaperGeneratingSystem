@@ -11,20 +11,22 @@ const validateMongodbID = require("../../utils/validateMongodbID");
 
 const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
     // check if user exist
-    const subjectExist = await Subject.findOne({ name: req?.body?.name });
 
+    const subjectExist = await Subject.findOne({ name: req?.body?.name });
+    
     if (subjectExist) {
         res.status(401);
         throw new Error('subject already exists');
     }
-
+    
+    console.log(req?.user?.id);
     const id = req?.user.id;
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });
 
     if (userFound && userFound.status && userFound.role) {
-
+        console.log("........3");
         try {
             //Register user
             const sub = await Subject.create({
@@ -32,6 +34,7 @@ const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
             });
             res.status(200).json(sub);
         } catch (error) {
+            console.log("error....")
             res.status(401).json(error);
         }
     }

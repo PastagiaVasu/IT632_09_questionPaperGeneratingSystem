@@ -2,7 +2,6 @@ const expressAsyncHandler = require("express-async-handler");
 
 const jwt = require("jsonwebtoken");
 const User = require("../../model/user/user");
-
 const authMiddleware = expressAsyncHandler(async (req, res, next) => {
     let token;
 
@@ -27,6 +26,7 @@ const authMiddleware = expressAsyncHandler(async (req, res, next) => {
         throw new Error("There is no token attached to header");
     }
 });
+
 
 
 module.exports = authMiddleware;

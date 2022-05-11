@@ -1,9 +1,9 @@
 const expressAsyncHandler = require("express-async-handler");
 const User = require("../../model/user/user");
-const Question = require("../../model/question/question");
 const generateToken = require("../../config/token/generateToken");
 const validateMongodbID = require("../../utils/validateMongodbID");
-
+const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 
 // ----------------------------------------------------------------
 //  Register
@@ -30,10 +30,77 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
             role: req?.body?.role,      // true for admin | false for faculty
             status: req?.body?.status,  // true for admin | false for faculty
         });
-        res.json(user);
+
+
+        //create token with email
+        let emailToken = generateToken(user.email);
+
+        let transporter = await nodemailer.createTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASS
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL, // sender address
+            to: user.email, // list of receivers
+            subject: "Follow this link to activate account", // subjectSubject line
+            html: "Hello, user. The link for your account verification is: " + `${process.env.SERVER}/api/user/verifyRegistration/${emailToken}`, //actual message
+        };
+
+        transporter.sendMail(mailOptions, function (err, info) {
+            if (err)
+                console.log(err)
+            else {
+                //console.log(info);
+                res.json(user);
+                res.status(200).send({ message: "mail sent successfully" });
+            }
+        });
+
+        //res.json(user);
     } catch (error) {
         res.json(error);
     }
+});
+
+// ----------------------------------------------------------------
+//  Verify Registration by account status = true
+// ----------------------------------------------------------------
+
+const verifyRegistration = expressAsyncHandler(async (req, res) => {
+    const emailToken = req.params.id;
+    const decoded = jwt.verify(emailToken, process.env.JWT_KEY);
+    //console.log("Decoded token in email is: "+decoded.id);
+    const userExist = await User.findOne({ email: decoded.id });
+
+    if (userExist) {
+        try {
+            const user = await User.findByIdAndUpdate(
+                userExist._id, {
+                isEmailVerified: true,
+            },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
+
+            // res.json(user);
+            res.status(200).send("Account verified successfully... You can login now");
+        } catch (error) {
+            res.json(error);
+        }
+    } else {
+        res.status(401);
+        throw new Error("The link is expired or invalid");
+    }
+
 });
 
 /**/
@@ -44,18 +111,27 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
     //check if user exists
     const userFound = await User.findOne({ email: email });
-
+    console.log(userFound);
     //check if paassword s matched
     if (userFound && userFound.status && await userFound.isPasswordMatched(password)) {
-        res.status(200).json({
-            _id: userFound?._id,
-            firstName: userFound?.firstName,
-            lastName: userFound?.lastName,
-            email: userFound?.email,
-            profilePhoto: userFound?.profilePhoto,
-            role: userFound?.role,
-            token: generateToken(userFound?._id),
-        });
+
+        console.log("Inside if.....");
+        if (userFound?.isEmailVerified) {
+
+            res.status(200).json({
+                _id: userFound?._id,
+                firstName: userFound?.firstName,
+                lastName: userFound?.lastName,
+                email: userFound?.email,
+                profilePhoto: userFound?.profilePhoto,
+                role: userFound?.role,
+                token: generateToken(userFound?._id),
+            });
+        }
+        else {
+            res.status(401);
+            throw new Error('Please verify your email first.');
+        }
     }
     else {
         res.status(401);
@@ -63,6 +139,8 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     }
 
 });
+
+
 
 /**/
 //-----------------------------------------------------------
@@ -79,7 +157,7 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
     if (userFound && userFound.status && userFound.role) {
 
         try {
-            const user = await User.find({ role: false });  // fetch all faculties
+            const user = await User.find({ role: false, status: false });  // fetch all faculties
             res.status(200).json(user);
         } catch (error) {
             res.status(401).json(error);
@@ -96,16 +174,21 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
 //-----------------------------------------------------------
 
 const userStatusCtrl = expressAsyncHandler(async (req, res) => {
+    //verify id admin is logged in
+    //verify id admin is logged in
+    const idAdmin = req?.user.id;
+    validateMongodbID(idAdmin);
+    const userFound = await User.findOne({ _id: idAdmin });  //userFound is admin
 
-    const id = req?.user.id;
-    validateMongodbID(id);
+    //now find the id which is being blocked or unblocked 
+    const userExist = await User.findOne({ _id: req?.params?.id });  //user exist is faculty
 
-    const userFound = await User.findOne({ _id: id });
-    const userExist = await User.findOne({ _id: req?.body?.user_id });
-
-    if (userFound && userFound.status && userFound.role) {
+    if (userFound && userFound.status && userFound.role) {     //check if admin is active or not
 
         try {
+
+
+            //change status of the id found by clicking button
             const user = await User.findByIdAndUpdate(
                 userExist._id, {
                 status: !userExist.status,
@@ -116,15 +199,46 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
                 }
             );
 
-            // res.json(user);
-            res.status(200).send("Status changed");
+
+            //now send mail to that user 
+            let transporter = await nodemailer.createTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: process.env.EMAIL,
+                    pass: process.env.EMAIL_PASS
+                },
+            });
+
+
+            const mailOptions = {
+                from: process.env.EMAIL, // sender address
+                to: userExist.email, // list of receivers
+                subject: "Attention, Your account status has changed!", // subjectSubject line
+                html: "Hello user, Your account ststus has been changed: " + `${userExist.status}`, //actual message
+            };
+
+
+            transporter.sendMail(mailOptions, function (err, info) {
+                if (err)
+                    console.log(err);
+                else {
+                    //console.log(info);
+                    res.json(user);
+                    res.status(200).send({ message: "status changed successfully" });
+                }
+            });
+
+            //res.status(200).send("Status changed but mail sending was erroros");
         } catch (error) {
             res.json(error);
         }
     }
     else {
         res.status(401);
-        throw new Error("Your account blocked");
+        throw new Error("Admin, Your account is blocked...");
     }
 });
 
@@ -144,6 +258,28 @@ const userQuestionCtrl = expressAsyncHandler(async (req, res) => {
         try {
             const userQues = await Question.find({ user_id: id });  // fetch all userSubject
             res.status(200).json(userQues);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
+const fetchVerifiedUserCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && userFound.role) {
+
+        try {
+            const user = await User.find({ role: false, status: true });  // fetch all faculties
+            res.status(200).json(user);
         } catch (error) {
             res.status(401).json(error);
         }
@@ -174,7 +310,6 @@ const deleteFacultiesCtrl = expressAsyncHandler(async (req, res) => {
     }
     res.send("Delete faculty controller");
 });
-
 
 //-----------------------------------------------------------
 // faculty details
@@ -239,6 +374,8 @@ module.exports = {
     fetchUserCtrl,
     userStatusCtrl,
     userQuestionCtrl,
+    verifyRegistration,
+    fetchVerifiedUserCtrl,
     // userProfileCtrl,
     // deleteFacultiesCtrl,
     // fetchFacultyDetailsCtrl,

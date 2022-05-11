@@ -78,6 +78,9 @@ const editSubjectiveQuestion = expressAsyncHandler(async (req, res) => {
             // Edit question
             const que = await Question.findByIdAndUpdate(
                 question._id, {
+
+                subject_id: req?.body?.subject_id,
+                user_id: id,
                 question: req?.body?.question,
                 type: true,                        // true for subjective | false for objective
                 mark: req?.body?.mark,
@@ -287,44 +290,6 @@ const viewQuestionAnswer = expressAsyncHandler(async (req, res) => {
         } catch (error) {
             res.status(401).json(error);
         };
-
-
-
-        //     const anss = req?.body?.answers;
-        //     // console.log(anss);
-
-        //     if (!anss) {
-        //         res.status(401);
-        //         throw new Error("Answer not found");
-        //     }
-        //     anss.forEach(async (ans) => {
-
-        //         const answr = await Answer.findOne({ _id: ans.ans_id });
-        //         console.log(ans.ans_id);
-        //         if (!answr) {
-        //             const answer = await Answer.create({
-
-        //                 question_id: question._id,
-        //                 answer: ans?.answer,
-        //                 right: ans?.right,
-        //             });
-        //             console.log("ans added");
-        //         } else {
-        //             const answer = await Answer.findByIdAndUpdate(
-        //                 ans.ans_id, {
-        //                 question_id: ans.question_id,
-        //                 answer: ans?.answer,
-        //                 right: ans?.right,
-        //                 status: ans?.ans_status,
-        //             });
-        //             console.log("ans updated");
-        //         }
-        //     });
-
-        //     res.status(200).send("Question updated successfully");
-        // } catch (error) {
-        //     res.status(401).json(error);
-        // }
     }
     else {
         res.status(401);
