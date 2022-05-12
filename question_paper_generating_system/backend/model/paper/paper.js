@@ -21,6 +21,14 @@ const paperSchema = new mongoose.Schema({
         required: [true, "Weightage is required"],
         type: Number,
     },
+    type: {
+        required: [true, "Type is required"],
+        type: Boolean,
+    },
+    difficulty: {
+        required: [true, "Difficulty level is required"],
+        type: Number,
+    },
     status: {
         type: Boolean,
         default: true,

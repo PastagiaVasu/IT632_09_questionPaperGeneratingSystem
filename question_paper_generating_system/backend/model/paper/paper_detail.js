@@ -8,6 +8,11 @@ const paperDetailSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'paper',
     },
+    question_id: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'question',
+    },
     answer_id: {
         required: true,
         type: mongoose.Schema.Types.ObjectId,

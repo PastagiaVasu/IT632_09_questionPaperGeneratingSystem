@@ -7,6 +7,10 @@ const subjectSchema = new mongoose.Schema({
         required: [true, "Subject name is required"],
         type: String,
     },
+    status: {
+        type: Boolean,
+        default: true,
+    }
 },
     {
         toJSON: {

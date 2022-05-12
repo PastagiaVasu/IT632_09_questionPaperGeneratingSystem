@@ -3,10 +3,15 @@ const mongoose = require('mongoose');
 //create schema object
 const questionSchema = new mongoose.Schema({
 
-    user_subject_id: {
+    subject_id: {
         required: true,
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user_subject',
+        ref: 'subject',
+    },
+    user_id: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
     },
     question: {
         required: [true, "Question is required"],
@@ -20,8 +25,8 @@ const questionSchema = new mongoose.Schema({
         required: [true, "Mark is required"],
         type: Number,
     },
-    diffculty: {
-        required: [true, "Diffculty level is required"],
+    difficulty: {
+        required: [true, "Difficulty level is required"],
         type: Number,
     },
     status: {

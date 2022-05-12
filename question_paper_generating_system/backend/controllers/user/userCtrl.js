@@ -1,10 +1,10 @@
 const expressAsyncHandler = require("express-async-handler");
 const User = require("../../model/user/user");
+const Question = require("../../model/question/question");
 const generateToken = require("../../config/token/generateToken");
 const validateMongodbID = require("../../utils/validateMongodbID");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-
 
 // ----------------------------------------------------------------
 //  Register
@@ -34,7 +34,7 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
 
 
         //create token with email
-        let emailToken =  generateToken(user.email);
+        let emailToken = generateToken(user.email);
 
         let transporter = await nodemailer.createTransport({
             service: 'gmail',
@@ -57,7 +57,7 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
         transporter.sendMail(mailOptions, function (err, info) {
             if (err)
                 console.log(err)
-            else{
+            else {
                 //console.log(info);
                 res.json(user);
                 res.status(200).send({ message: "mail sent successfully" });
@@ -70,12 +70,9 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
-
-
 // ----------------------------------------------------------------
 //  Verify Registration by account status = true
 // ----------------------------------------------------------------
-
 
 const verifyRegistration = expressAsyncHandler(async (req, res) => {
     const emailToken = req.params.id;
@@ -100,16 +97,12 @@ const verifyRegistration = expressAsyncHandler(async (req, res) => {
         } catch (error) {
             res.json(error);
         }
-    }else{
+    } else {
         res.status(401);
         throw new Error("The link is expired or invalid");
     }
 
 });
-
-
-
-
 
 /**/
 //----------------------------------------------------------------
@@ -124,7 +117,7 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     if (userFound && userFound.status && await userFound.isPasswordMatched(password)) {
 
         console.log("Inside if.....");
-        if(userFound?.isEmailVerified){
+        if (userFound?.isEmailVerified) {
 
             res.status(200).json({
                 _id: userFound?._id,
@@ -136,10 +129,10 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
                 token: generateToken(userFound?._id),
             });
         }
-        else{
+        else {
             res.status(401);
-            throw new Error('Please verify your email first.');     
-        }  
+            throw new Error('Please verify your email first.');
+        }
     }
     else {
         res.status(401);
@@ -147,6 +140,7 @@ const loginCtrl = expressAsyncHandler(async (req, res) => {
     }
 
 });
+
 
 
 /**/
@@ -164,7 +158,7 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
     if (userFound && userFound.status && userFound.role) {
 
         try {
-            const user = await User.find({ role: false });  // fetch all faculties
+            const user = await User.find({ role: false, status: false });  // fetch all faculties
             res.status(200).json(user);
         } catch (error) {
             res.status(401).json(error);
@@ -181,7 +175,6 @@ const fetchUserCtrl = expressAsyncHandler(async (req, res) => {
 //-----------------------------------------------------------
 
 const userStatusCtrl = expressAsyncHandler(async (req, res) => {
-
     //verify id admin is logged in
     const idAdmin = req?.user.id;
     validateMongodbID(idAdmin);
@@ -249,6 +242,53 @@ const userStatusCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
+//-----------------------------------------------------------
+// fetch all userQuestions
+//-----------------------------------------------------------
+
+const userQuestionCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && !userFound.role) {
+
+        try {
+            const userQues = await Question.find({ user_id: id });  // fetch all userSubject
+            res.status(200).json(userQues);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
+const fetchVerifiedUserCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status && userFound.role) {
+
+        try {
+            const user = await User.find({ role: false, status: true });  // fetch all faculties
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
 
 /*
 //-----------------------------------------------------------
@@ -270,7 +310,6 @@ const deleteFacultiesCtrl = expressAsyncHandler(async (req, res) => {
     }
     res.send("Delete faculty controller");
 });
-
 
 //-----------------------------------------------------------
 // faculty details
@@ -329,12 +368,73 @@ const updateFacultyCtrl = expressAsyncHandler(async (req, res) => {
 
 });
 */
+
+//-----------------------------------------------------------
+// User profile
+//-----------------------------------------------------------
+
+const userProfileCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+    if (userFound && userFound.status) {
+
+        try {
+            res.status(200).json(userFound);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
+//-----------------------------------------------------------
+// User edit profile
+//-----------------------------------------------------------
+
+const userEditProfileCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+    console.log(req.body.firstName);
+    const userFound = await User.findOne({ _id: id });
+    if (userFound && userFound.status) {
+        console.log("inside if")
+        try {
+            // Edit user
+            const user = await User.findByIdAndUpdate(
+                id, {
+                firstName: req?.body?.firstName,
+                lastName: req?.body?.lastName,
+                contact_number: req?.body?.contact_number                    
+            });
+            // console.log(user);
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
 module.exports = {
     userRegisterCtrl,
     loginCtrl,
     fetchUserCtrl,
     userStatusCtrl,
+    userQuestionCtrl,
     verifyRegistration,
+    fetchVerifiedUserCtrl,
+    userEditProfileCtrl,
+    userProfileCtrl,
     // userProfileCtrl,
     // deleteFacultiesCtrl,
     // fetchFacultyDetailsCtrl,

@@ -2,30 +2,23 @@ const express = require("express");
 const dotenv = require("dotenv");
 const dbConnect = require("./config/db/dbConnect");
 const userRoutes = require("././route/user/userRoute");
+const paperRoutes = require("././route/paper/paperRoute");
 const questionRoutes = require("././route/question/questionRoute");
 const { errorHandler, notFound } = require("./middlewares/error/errorHandler");
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
+
+var cors = require("cors")
 
 dotenv.config();
 const app = express();
 //console.log(app);
-
+app.use(cors())
 //DB connection
 dbConnect();
 //console.log(process.env);
 
 //Middleware
 app.use(express.json());
-app.use(cookieParser());
-app.use(session(
-        {
-            secret: process.env.SESSION_SECRET,
-            resave: false,
-            saveUninitialized: true,
-            cookie: { secure: true }
-        }
-    ));
+
 //server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, console.log(`Server is running on port ${PORT}`));
@@ -42,6 +35,7 @@ app.listen(PORT, console.log(`Server is running on port ${PORT}`));
 //userRoutes
 app.use("/api/user", userRoutes);
 app.use("/api/question", questionRoutes);
+app.use("/api/paper", paperRoutes);
 
 //errorHandler
 //catch error beloe route

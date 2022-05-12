@@ -10,7 +10,8 @@ const validateMongodbID = require("../../utils/validateMongodbID");
 //-----------------------------------------------------------
 
 const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
-    // check if user exist
+
+    // check if subject exist
     const subjectExist = await Subject.findOne({ name: req?.body?.name });
 
     if (subjectExist) {
@@ -18,13 +19,14 @@ const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
         throw new Error('subject already exists');
     }
 
+    // console.log(req?.user?.id);
     const id = req?.user.id;
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });
 
     if (userFound && userFound.status && userFound.role) {
-
+        console.log("........3");
         try {
             //Register user
             const sub = await Subject.create({
@@ -32,6 +34,7 @@ const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
             });
             res.status(200).json(sub);
         } catch (error) {
+            console.log("error....")
             res.status(401).json(error);
         }
     }
@@ -48,7 +51,7 @@ const newSubjectCtrl = expressAsyncHandler(async (req, res) => {
 const userAddSubjectCtrl = expressAsyncHandler(async (req, res) => {
 
     const id = req?.user.id;
-    const sid = req?.body?.subjectId;
+    const sid = req?.body?.subject_id;
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });
@@ -103,7 +106,7 @@ const userSubjectStatusCtrl = expressAsyncHandler(async (req, res) => {
     validateMongodbID(id);
 
     const userFound = await User.findOne({ _id: id });
-    const userSubExist = await userSubject.findOne({ _id: req?.body?.userSubId });
+    const userSubExist = await userSubject.findOne({ user_id: id, subject_id: req?.body?.subject_id });
 
     if (userFound && userFound.status && !userFound.role) {
 
@@ -131,7 +134,7 @@ const userSubjectStatusCtrl = expressAsyncHandler(async (req, res) => {
 });
 
 //-----------------------------------------------------------
-// fetch all subject
+// fetch all subject 
 //-----------------------------------------------------------
 
 const fetchSubjectCtrl = expressAsyncHandler(async (req, res) => {
@@ -157,7 +160,7 @@ const fetchSubjectCtrl = expressAsyncHandler(async (req, res) => {
 });
 
 //-----------------------------------------------------------
-// fetch all userSubject
+// fetch all userSubject id
 //-----------------------------------------------------------
 
 const userSubjectCtrl = expressAsyncHandler(async (req, res) => {
@@ -182,12 +185,92 @@ const userSubjectCtrl = expressAsyncHandler(async (req, res) => {
     }
 });
 
+//-----------------------------------------------------------
+// fetch subject by id
+//-----------------------------------------------------------
+
+const fetchSubjectByIdCtrl = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+
+    if (userFound && userFound.status) {
+
+        try {
+            const sub = await Subject.findOne({ _id: req?.body?.subject_id });  // fetch all userSubject
+            res.status(200).json(sub);
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
+//-----------------------------------------------------------
+// admin delete subject (also gets deleted for faculty)  soft delete
+//-----------------------------------------------------------
+
+const adminDeleteSubject = expressAsyncHandler(async (req, res) => {
+
+    const id = req?.user.id;
+    validateMongodbID(id);
+
+    const userFound = await User.findOne({ _id: id });
+    const subExist = await Subject.findOne({ _id: req?.body?.subject_id });
+
+    if (userFound && userFound.status && userFound.role) {
+
+        try {
+            const Sub = await Subject.findByIdAndUpdate(
+                subExist._id, {
+                status: !subExist.status,
+            },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
+            
+
+            const userSubjectsUpdated = await userSubject.updateMany(
+                {
+                    subject_id : subExist._id, 
+                    status: true
+                }, 
+                {
+                    status: !subExist.status,
+                },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
+
+            // res.json(user);
+            res.status(200).send("Status changed for admin and all faculty");
+        } catch (error) {
+            res.status(401).json(error);
+        }
+    }
+    else {
+        res.status(401);
+        throw new Error("Your account blocked");
+    }
+});
+
 module.exports = {
     userAddSubjectCtrl,
     newSubjectCtrl,
     userSubjectStatusCtrl,
     fetchSubjectCtrl,
     userSubjectCtrl,
+    fetchSubjectByIdCtrl,
+    adminDeleteSubject,
     // deleteFacultiesCtrl,
     // fetchFacultyDetailsCtrl,
     // facultyProfileCtrl,
